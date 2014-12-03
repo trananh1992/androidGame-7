@@ -4,58 +4,62 @@ import android.graphics.Bitmap;
 
 public class Ball extends Sprite {
 
-	public boolean move;
 	
-	public  Ball(GameView gameView, Bitmap bmp, int x, int y)
+	
+	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
-		super(gameView, bmp, x, y);
+		super(gameView, bmp, x, y, xSpeed, ySpeed);
 		this.stop();
 	}
 	
-	
 	 public void update() 
      {
-  	   if (x >= gameView.getWidth() - width - xSpeed || x + xSpeed <= 0) 
+  	   if (origin.x >= gameView.getWidth() - width - xSpeed || origin.x + xSpeed <= 0) 
+         {        
+            bounce(true);
+            
+         }else if ( origin.y + ySpeed <= 0) 
          {
-             xSpeed = -xSpeed;
-             xSpeed = upperSpeed(xSpeed, 13);
-             ySpeed = upperSpeed(ySpeed, 13);
+            bounce(false);
          }
-         if ( y + ySpeed <= 0) 
-         {
-             ySpeed = -ySpeed;
-             ySpeed = upperSpeed(ySpeed, 13);
-             xSpeed = upperSpeed(xSpeed, 13);
-         }
+        
+  	   
+   	 origin.x = origin.x + xSpeed;
+     origin.y = origin.y + ySpeed;
          
-         if(!move)
-    	   {
-    		   x = gameView.getWidth()/2 - width/2;
-    		   y = gameView.getHeight()- height*5;
-    	   } else 
-    	   {
-    		 x = x + xSpeed;
-    		 y = y + ySpeed;
-    	   }  
          
        
      }
+	 
+	 public void bounce(boolean isVertical)
+	 {
+		 if(isVertical)
+		 {
+			 xSpeed = -xSpeed;
+		 } else 
+		 {
+			 ySpeed = -ySpeed;
+		 }
+		 xSpeed = upperSpeed(xSpeed, 13);
+         ySpeed = upperSpeed(ySpeed, 13);
+	 }
 	 
 	 public void start()
 	 {
 		 xSpeed = 5;
 		 ySpeed = -5;
-		 move = true; 
 	 }
 	 
 	 public void stop()
 	 {
 		 xSpeed = 0;
-		 ySpeed = 0;
-		 move = false;
-		 
+		 ySpeed = 0;		 
 	 }
-	 
+	 public void startPosition()
+	{
+		 origin.x = gameView.getWidth()/2 - width/2;
+		 origin.y = gameView.getHeight() - height*4;
+	}
 	 
 	 
 	 

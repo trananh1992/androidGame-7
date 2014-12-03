@@ -9,25 +9,22 @@ import android.graphics.Canvas;
 	 protected Bitmap bmp;
     
    
-	 protected float x;
-	 protected float y;
+	 protected Point origin;
 	 
 	 protected int xSpeed;
 	 protected int ySpeed;
-    
 
-    protected int currentFrame = 0;
-
-    protected int width;
-    protected int height;
+	 protected int width;
+	 protected int height;
       
-       /**Конструктор*/
-       public Sprite(GameView gameView, Bitmap bmp, int x, int y) 
+	 	public Sprite(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed) 
        {
+	 		
              this.gameView=gameView;
              this.bmp=bmp;
-             this.xSpeed = x;
-             this.ySpeed = y;
+             this.origin = new Point(x,y); 
+             this.xSpeed = xSpeed;
+             this.ySpeed = ySpeed;
              this.width = bmp.getWidth();
              this.height = bmp.getHeight();
        }
@@ -44,7 +41,7 @@ import android.graphics.Canvas;
        public void onDraw(Canvas canvas) 
        {
              update();
-             canvas.drawBitmap(bmp, x , y, null);
+             canvas.drawBitmap(bmp, origin.x , origin.y, null);
        }
        
        protected int upperSpeed(int speed, int maxSpeed){
@@ -62,7 +59,7 @@ import android.graphics.Canvas;
        }
        
        public Point getCenter(){
-    	   Point center = new Point((int)(x - width/2),(int)( y - height/2));
+    	   Point center = new Point((int)(origin.x - width/2),(int)( origin.y - height/2));
     	   return center;
        }
        
