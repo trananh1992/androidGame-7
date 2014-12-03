@@ -1,22 +1,23 @@
 package org.hexlet.testproject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
- public class MainActivity extends Activity implements OnTouchListener {
+ @SuppressLint("ClickableViewAccessibility")
+public class MainActivity extends Activity implements OnTouchListener {
 
-	 private GameView gm;
+	 private GameView gameView;
 	 public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
 
-        gm = new GameView(this);
-        gm.setOnTouchListener(this);
+        gameView = new GameView(this);
+        gameView.setOnTouchListener(this);
         
-        
-        setContentView(gm);
+        setContentView(gameView);
     }
     @Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -26,10 +27,10 @@ import android.view.View.OnTouchListener;
 		    switch (event.getAction()) 
 		    {
 		    case MotionEvent.ACTION_DOWN: 
-		    	gm.ball.start();
+		    	gameView.game.start();
 		      break;
 		    case MotionEvent.ACTION_MOVE: 
-		    	gm.platform.xMove = x - gm.platform.width/2;
+		    	gameView.game.platform.xMove = x - gameView.game.platform.width/2;
 		      break;
 		   
 		  }
