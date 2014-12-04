@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.WindowManager;
 
 @SuppressLint("WrongCall")
@@ -38,18 +39,21 @@ public class Game {
          platform = createPlatform();
          
 	}
-	
+	public int i;
 	public void drawOnCanvas(Canvas canvas)
 	{
 		canvas.drawColor(Color.BLACK);
-		 if(ball.origin.y > gameView.getHeight() - platform.height - ball.height && ball.origin.x > platform.origin.x &&
-       		  ball.origin.x + ball.width < platform.origin.x + platform.width)
-         {
-       	  ball.ySpeed = -ball.ySpeed;
-         }
-         
+		
+		
+		if(ball.origin.y > gameView.getHeight() - platform.height - ball.height && ball.origin.x > platform.origin.x &&
+				ball.origin.x + ball.width < platform.origin.x + platform.width)
+		{
+			ball.ySpeed = -ball.ySpeed;
+		}
+		
          ball.onDraw(canvas);
          platform.onDraw(canvas);
+         
          if(!start)
          {
         	 platform.startPosition();

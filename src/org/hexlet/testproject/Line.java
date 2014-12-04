@@ -21,20 +21,21 @@ public class Line {
 		
 	}
 	
-	public boolean intersect(Line line)
+	public Point intersect(Line line)
 	{
 		x3 = line.x1;
 		y3 = line.y1;
 		x4 = line.x2;
 		y4 = line.y2;
-		
+		if (((y1-y2)*(x4-x3)-(y3-y4)*(x2-x1)) == 0 || (x4-x3) == 0) return null;
 		x = ((x1*y2-x2*y1)*(x4-x3)-(x3*y4-x4*y3)*(x2-x1))/((y1-y2)*(x4-x3)-(y3-y4)*(x2-x1));
 		y = ((y3-y4)*x-(x3*y4-x4*y3))/(x4-x3);
 		
 		if (x1<= x && x2 >= x && x3 <= x && x4 >= x || y1 <= y && y2 >= y && y3 <= y && y4 >= y){
-			return true;
+			
+			return new Point(Math.round(x),Math.round(y));
 		}
-		return false; 
+		return null; 
 	}
 	
 	

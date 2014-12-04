@@ -60,8 +60,17 @@ public class Ball extends Sprite {
 		 origin.x = gameView.getWidth()/2 - width/2;
 		 origin.y = gameView.getHeight() - height*4;
 	}
-	 
-	 
+	public Point getCenter(){
+		
+  	   center = new Point((int)(origin.x - width/2),(int)( origin.y - height/2));
+  	   
+  	   return center;
+	}   
+	public Line getLine()
+	{
+		center = getCenter();
+		return new Line(center.x, center.y, center.x + xSpeed, center.y + ySpeed);
+	}
 	 
 	 
 	 

@@ -2,7 +2,7 @@ package org.hexlet.testproject;
 
 import android.graphics.Bitmap;
 
-public class Platform extends Sprite{
+public class Platform extends Block{
 	public boolean start = false;
 	public float xMove;
 	public  Platform(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
@@ -32,4 +32,27 @@ public class Platform extends Sprite{
 	 {
 		start = false;
 	 }
+	 public Point getCenter(){
+			
+		center = new Point((int)(origin.x - width/2),(int)( origin.y - height/2));
+	  	   
+	    return center;
+	}
+	 
+	 
+//	 
+//	 public boolean isCollision(Line ballLine)
+//		{
+//			initLines();
+//			point = ballLine.intersect(arrayOfLines[1]); 
+//				if(point != null)
+//				{
+//					points.add(point);
+//				};
+//			return true;
+//		}
+//		public Point pointCollision()
+//		{
+//			return points.get(0);
+//		}
 }
