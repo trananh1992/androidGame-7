@@ -8,7 +8,7 @@ import android.graphics.Canvas;
     
 	 protected Bitmap bmp;
     
-   
+	 protected Point center;
 	 protected Point origin;
 	 
 	 protected int xSpeed;
@@ -59,7 +59,14 @@ import android.graphics.Canvas;
        }
        
        public Point getCenter(){
-    	   Point center = new Point((int)(origin.x - width/2),(int)( origin.y - height/2));
+    	   if(center == null)
+    	   {
+    		   center = new Point((int)(origin.x - width/2),(int)( origin.y - height/2));   
+    	   } else 
+    	   {
+    		   return center;
+    	   }
+    	   
     	   return center;
        }
        

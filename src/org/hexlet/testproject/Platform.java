@@ -2,9 +2,9 @@ package org.hexlet.testproject;
 
 import android.graphics.Bitmap;
 
-public class Platform extends Sprite{
+public class Platform extends Block{
 	public boolean start = false;
-	public float xMove;
+	private float xMove;
 	public  Platform(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
@@ -32,4 +32,30 @@ public class Platform extends Sprite{
 	 {
 		start = false;
 	 }
+	 public Point getCenter(){
+			
+		center = new Point((int)(origin.x - width/2),(int)( origin.y - height/2));
+	  	   
+	    return center;
+	}
+	 
+	public void move(float xMove)
+	{
+		this.xMove = xMove;
+	}
+	public Line getLine(int correction)
+	{
+		return new Line(origin.x + correction, origin.y, origin.x + width + correction, origin.y);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
