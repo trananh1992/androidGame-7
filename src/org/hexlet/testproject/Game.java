@@ -9,12 +9,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.util.Log;
 
 @SuppressLint("WrongCall")
 public class Game {
 
-    private Sprite sprite;   
+    private Sprite spriteForDelete;  
+    private List<Sprite>nearObjects;
     private List<Block> blocks = new ArrayList<Block>();
     public boolean blockCreated = false;
     public boolean start = false;
@@ -43,19 +43,52 @@ public class Game {
 	{
 		canvas.drawColor(Color.BLACK);
 		
-		
+		if(!start)
+        {
+			platform.startPosition();
+			ball.startPosition();	 
+        }
 		if (!blockCreated)
 		{
 			blockCreated = true;
 			createBlocks();	
 		}
 		
+		if (start)
+		{
+			int distance;
+			nearObjects = new ArrayList<Sprite>();
+			if(!blocks.isEmpty())
+			{
+				for(Block block : blocks)
+				{
+					distance = block.getCenter().calculateDistance(ball.getNextCenter());
+					if(distance < calculateMaxDistance(block))
+					{
+						nearObjects.add(block);	
+					}
+				}
+				if(!nearObjects.isEmpty())
+				{
+					Point nearestPoint = new Point(-200,-200);
+					for(Sprite sprite : nearObjects)
+					{
+						Point point = sprite.isCollision(ball);
+						if(point != null && ball.getCenter().calculateDistance(point) < ball.getCenter().calculateDistance(nearestPoint))
+						{
+							nearestPoint = point;
+							spriteForDelete = sprite;
+						}
+					}
+					blocks.remove(spriteForDelete);
+				}	
+			}
+		}
 		
-		 if(!start)
-         {
-        	 platform.startPosition();
-             ball.startPosition();	 
-         }
+		
+		
+		
+		
 		
 		Line line = platform.getLine(ball.getCorrection());
 		Point intersect = ball.getLine().intersect(line); 
@@ -64,13 +97,19 @@ public class Game {
 			ball.bounce(intersect, false);		
 		}
 		
+		
+		
+		
          ball.onDraw(canvas);
          platform.onDraw(canvas);
-        
-         for(Block block : blocks)
+         if(!blocks.isEmpty())
          {
-        	 block.onDraw(canvas);
+        	 for(Block block : blocks)
+             {
+            	 block.onDraw(canvas);
+             }
          }
+         
 	}
 	
 	
@@ -146,11 +185,19 @@ public class Game {
 			positionX += bmp.getWidth()+2;
 			positionY = bmp.getWidth();
 		}
+		
+//		points.add(new Point(gameView.getWidth()/2,gameView.getHeight()/2));
+		
 		return points;
 	} 
 	
 	
-	
+	private int calculateMaxDistance(Block block)
+	{
+		int speed = (int) Math.sqrt(Math.pow(ball.xSpeed, 2) + Math.pow(ball.ySpeed, 2));
+		int distance = speed + ball.width/2 + block.bmp.getWidth();
+		return distance;
+	}
 	
 	
 	
