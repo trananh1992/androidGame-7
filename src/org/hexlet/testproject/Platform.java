@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 public class Platform extends Block{
 	public boolean start = false;
-	public float xMove;
+	private float xMove;
 	public  Platform(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
@@ -39,20 +39,23 @@ public class Platform extends Block{
 	    return center;
 	}
 	 
-	 
-//	 
-//	 public boolean isCollision(Line ballLine)
-//		{
-//			initLines();
-//			point = ballLine.intersect(arrayOfLines[1]); 
-//				if(point != null)
-//				{
-//					points.add(point);
-//				};
-//			return true;
-//		}
-//		public Point pointCollision()
-//		{
-//			return points.get(0);
-//		}
+	public void move(float xMove)
+	{
+		this.xMove = xMove;
+	}
+	public Line getLine(int correction)
+	{
+		return new Line(origin.x + correction, origin.y, origin.x + width + correction, origin.y);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
