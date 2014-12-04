@@ -72,7 +72,10 @@ import android.graphics.Canvas;
        
        
        
-       
+       public Point isCollision(Ball ball)
+       {
+    	   return null;
+       }
        
        
        

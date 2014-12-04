@@ -152,8 +152,10 @@ public class Ball extends Sprite {
 	 return correction;
 	}
 	 
-	 
-	 
+	 public Point getNextCenter()
+	 {
+		 return new Point(center.x + xSpeed, center.y + ySpeed);
+	 }
 	 
 	 
 	 

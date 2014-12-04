@@ -1,6 +1,5 @@
 package org.hexlet.testproject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +14,7 @@ public class Block extends Sprite {
 	private Line arrayOfLines[];
 	private List<Point> points;
 	private Point point;
+	private boolean initLines = false;
 	public Block(GameView gameView, Bitmap bmp, int x, int y, int xSpeed,
 			int ySpeed) {
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
@@ -30,19 +30,48 @@ public class Block extends Sprite {
 
 		arrayOfLines = new Line[]{line1, line2, line3, line4};
 	}
-	public boolean isCollision(Line ballLine)
+	
+	
+	public Point isCollision(Ball ball)
 	{
-		initLines();
+		if(!initLines)initLines();
+
 		points = new ArrayList<Point>();
 		
 		for (int i = 0; i < 4; i++)
 		{
-			point = ballLine.intersect(arrayOfLines[i]); 
+			point = ball.getLine().intersect(arrayOfLines[i]); 
 			if(point != null)
 			{
 				points.add(point);
 			};
 		}
-		return true;
+		Point nearestPoint = new Point(-200,-200);
+		if(!points.isEmpty())
+		{
+			for (Point point : points)
+			{
+				if(ball.getCenter().calculateDistance(point) < ball.getCenter().calculateDistance(nearestPoint))
+				{
+					nearestPoint = point;
+				}
+			}
+		}
+		if(ball.getCenter().calculateDistance(nearestPoint) < 200) return nearestPoint;
+		return null;
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
