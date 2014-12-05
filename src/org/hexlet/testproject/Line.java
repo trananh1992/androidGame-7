@@ -1,19 +1,19 @@
 package org.hexlet.testproject;
 
-public class Line {
+public class Line extends Object{
 
-	private int x1;
-	private int y1;
-	private int x2;
-	private int y2;
-	private int x3;
-	private int y3;
-	private int x4;
-	private int y4;
+	public float x1;
+	public float y1;
+	public float x2;
+	public float y2;
+	private float x3;
+	private float y3;
+	private float x4;
+	private float y4;
 	
-	public int x;
-	public int y;
-	public Line(int x1, int y1, int x2, int y2){
+	public float x;
+	public float y;
+	public Line(float x1, float y1, float x2, float y2){
 		this.x1 = x1;
 		this.x2 = x2;
 		this.y1 = y1;
@@ -44,7 +44,7 @@ public class Line {
 	}
 	
 	
-	private boolean checkPointForLine(int x1, int y1, int x2, int y2, float X, int Y)
+	public boolean checkPointForLine(float x1, float y1, float x2, float y2, float X, float Y)
 	{
 		if(x1<= X && x2 >= X && y1 <= Y && y2 >= Y) return true;
 		if(x1<= X && x2 >= X && y2 <= Y && y1 >= Y) return true;

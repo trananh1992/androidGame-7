@@ -43,9 +43,9 @@ public class Platform extends Block{
 	{
 		this.xMove = xMove;
 	}
-	public Line getLine(int correction)
+	public Line getLine()
 	{
-		return new Line(origin.x + correction, origin.y, origin.x + width + correction, origin.y);
+		return new Line(origin.x , origin.y, origin.x + width, origin.y);
 	}
 	
 	

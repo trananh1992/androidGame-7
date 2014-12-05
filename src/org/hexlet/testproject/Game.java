@@ -56,46 +56,27 @@ public class Game {
 		
 		if (start)
 		{
-			int distance;
-			nearObjects = new ArrayList<Sprite>();
-			if(!blocks.isEmpty())
+//			checkCollisionsForSprites();
+			ArrayList<Line> array = new ArrayList<Line>();
+			array.add(platform.getLine());
+			array.add(new Line(0 , gameView.getHeight(), 0, 0));
+			array.add(new Line(0 , 0, gameView.getWidth(), 0));
+			array.add(new Line(gameView.getWidth(), 0, gameView.getWidth(), gameView.getHeight()));
+			if(!ball.makeBounceFromLinesWithAccuracy(array, 10.f))
 			{
-				for(Block block : blocks)
-				{
-					distance = block.getCenter().calculateDistance(ball.getNextCenter());
-					if(distance < calculateMaxDistance(block))
-					{
-						nearObjects.add(block);	
-					}
-				}
-				if(!nearObjects.isEmpty())
-				{
-					Point nearestPoint = new Point(-200,-200);
-					for(Sprite sprite : nearObjects)
-					{
-						Point point = sprite.isCollision(ball);
-						if(point != null && ball.getCenter().calculateDistance(point) < ball.getCenter().calculateDistance(nearestPoint))
-						{
-							nearestPoint = point;
-							spriteForDelete = sprite;
-						}
-					}
-					blocks.remove(spriteForDelete);
-				}	
+				ball.origin.x += ball.xSpeed;
+				ball.origin.y += ball.ySpeed;
 			}
 		}
 		
 		
-		
-		
-		
-		
-		Line line = platform.getLine(ball.getCorrection());
-		Point intersect = ball.getLine().intersect(line); 
-		if(intersect != null)
-		{
-			ball.bounce(intersect, false);		
-		}
+//		
+//		Point intersect = ball.getLine().intersect(platform.getLine()); 
+//		if(intersect != null)
+//		{
+//			ball.bounce(intersect, false);		
+//		}
+//		
 		
 		
 		
@@ -105,7 +86,7 @@ public class Game {
          if(!blocks.isEmpty())
          {
         	 for(Block block : blocks)
-             {
+             { 
             	 block.onDraw(canvas);
              }
          }
@@ -130,9 +111,10 @@ public class Game {
 	
 	public void start()
 	{
-		start = true;
+		
 		ball.start();
 		platform.start();
+		start = true;
 	}
 	
 	
@@ -166,25 +148,25 @@ public class Game {
 	{
 		ArrayList<Point> points = new ArrayList<Point>();
 		
-		int horizontalCount = gameView.getWidth() / bmp.getWidth();
-		int verticalCount = (gameView.getHeight() / 2) / bmp.getHeight();
-		
-		
-		int positionX = (gameView.getWidth() - horizontalCount * bmp.getWidth())/2;
-		int positionY = bmp.getWidth();
-		
-		
-		
-		for (int i = 0; i < horizontalCount; i++)
-		{
-			for (int j = 0; j < verticalCount; j++)
-			{
-				points.add(new Point(positionX, positionY));
-				positionY += bmp.getHeight() + 2;
-			}
-			positionX += bmp.getWidth()+2;
-			positionY = bmp.getWidth();
-		}
+//		int horizontalCount = gameView.getWidth() / bmp.getWidth();
+//		int verticalCount = (gameView.getHeight() / 2) / bmp.getHeight();
+//		
+//		
+//		float positionX = (gameView.getWidth() - horizontalCount * bmp.getWidth())/2;
+//		float positionY = bmp.getWidth();
+//		
+//		
+//		
+//		for (int i = 0; i < horizontalCount; i++)
+//		{
+//			for (int j = 0; j < verticalCount; j++)
+//			{
+//				points.add(new Point(positionX, positionY));
+//				positionY += bmp.getHeight() + 2;
+//			}
+//			positionX += bmp.getWidth()+2;
+//			positionY = bmp.getWidth();
+//		}
 		
 //		points.add(new Point(gameView.getWidth()/2,gameView.getHeight()/2));
 		
@@ -192,12 +174,64 @@ public class Game {
 	} 
 	
 	
-	private int calculateMaxDistance(Block block)
+	private double calculateMaxDistance(Block block)
 	{
-		int speed = (int) Math.sqrt(Math.pow(ball.xSpeed, 2) + Math.pow(ball.ySpeed, 2));
-		int distance = speed + ball.width/2 + block.bmp.getWidth();
+		double speed = Math.sqrt(Math.pow(ball.xSpeed, 2) + Math.pow(ball.ySpeed, 2));
+		double distance = speed + ball.width/2 + block.bmp.getWidth();
 		return distance;
 	}
+	
+	
+	public void checkCollisionsForSprites()
+	{
+		double distance;
+		nearObjects = new ArrayList<Sprite>();
+		if(!blocks.isEmpty())
+		{
+			for(Block block : blocks)
+			{
+				distance = block.getCenter().calculateDistance(ball.getNextCenter());
+				if(distance < calculateMaxDistance(block))
+				{
+					nearObjects.add(block);	
+				}
+			}
+			if(!nearObjects.isEmpty())
+			{
+				Point nearestPoint = new Point(-200,-200);
+				for(Sprite sprite : nearObjects)
+				{
+					Point point = sprite.isCollision(ball);
+					if(point != null && ball.getCenter().calculateDistance(point) < ball.getCenter().calculateDistance(nearestPoint))
+					{
+						nearestPoint = point;
+						spriteForDelete = sprite;
+					}
+				}
+				if(spriteForDelete != null)
+				{
+					boolean isVertical = spriteForDelete.isPointOfVerticalLine(nearestPoint);
+					ball.bounce(nearestPoint, isVertical);
+					blocks.remove(spriteForDelete);
+					spriteForDelete = null;
+				}
+			}	
+		}
+	}
+	
+	
+	private void addBorders()
+	{
+		
+		Line line1 = new Line(0 , gameView.getHeight(), 0, 0);
+		Line line2 = new Line(0 , 0, gameView.getWidth(), 0);
+		Line line3 = new Line(gameView.getWidth(), 0, gameView.getWidth(), gameView.getHeight());
+		
+	}
+	
+	
+	
+	
 	
 	
 	

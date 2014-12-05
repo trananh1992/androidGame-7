@@ -11,18 +11,25 @@ import android.graphics.Canvas;
 	 protected Point center;
 	 protected Point origin;
 	 
-	 protected int xSpeed;
-	 protected int ySpeed;
+	 protected float xSpeed;
+	 protected float ySpeed;
 
-	 protected int width;
-	 protected int height;
+	 protected float width;
+	 protected float height;
       
-	 	public Sprite(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed) 
+	 protected Line line1;
+	 protected Line line2;
+	 protected Line line3;
+	 protected Line line4;
+	 protected Line arrayOfLines[];
+	 private boolean initLines = false;
+	
+		public Sprite(GameView gameView, Bitmap bmp, float x, float y, float xSpeed, float ySpeed) 
        {
 	 		
              this.gameView=gameView;
              this.bmp=bmp;
-             this.origin = new Point(x,y); 
+             this.origin = new Point(x,y);
              this.xSpeed = xSpeed;
              this.ySpeed = ySpeed;
              this.width = bmp.getWidth();
@@ -32,9 +39,7 @@ import android.graphics.Canvas;
        /**Перемещение объекта, его направление*/
        public void update() 
        {
-    	 
-          
-         
+    	   
        }
 
       /**Рисуем наши спрайты*/
@@ -44,7 +49,7 @@ import android.graphics.Canvas;
              canvas.drawBitmap(bmp, origin.x , origin.y, null);
        }
        
-       protected int upperSpeed(int speed, int maxSpeed){
+       protected float upperSpeed(float speed, float maxSpeed){
     	   
     	   if(speed  <  0 && speed > -maxSpeed)
     	   {
@@ -53,15 +58,14 @@ import android.graphics.Canvas;
     	   } else if ( speed > 0 && speed < maxSpeed)
     	   {
     		   speed++;
-    	   }
-    		   
+    	   }   
     	   return speed;
        }
        
        public Point getCenter(){
     	   if(center == null)
     	   {
-    		   center = new Point((int)(origin.x - width/2),(int)( origin.y - height/2));   
+    		   center = new Point((origin.x - width/2),( origin.y - height/2));   
     	   } else 
     	   {
     		   return center;
@@ -70,16 +74,21 @@ import android.graphics.Canvas;
     	   return center;
        }
        
-       
-       
        public Point isCollision(Ball ball)
-       {
-    	   return null;
-       }
+   	{
+   		if(!initLines)initLines();
+   	
+   		return null;
+   	}
        
-       
-       
-       
+       public void initLines()
+   	{
+   		
+   	}
+       public boolean isPointOfVerticalLine(Point point)
+   	{
+    	   return false;
+   	}
        
        
        
