@@ -7,37 +7,29 @@ import android.graphics.Bitmap;
 
 public class Block extends Sprite {
 
-	private Line line1;
-	private Line line2;
-	private Line line3;
-	private Line line4;
-	private Line arrayOfLines[];
+	
 	private List<Point> points;
 	private Point point;
-	private boolean initLines = false;
-	public Block(GameView gameView, Bitmap bmp, int x, int y, int xSpeed,
-			int ySpeed) {
+	
+	public Block(GameView gameView, Bitmap bmp, float x, float y, float xSpeed,
+			float ySpeed) {
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
 	}
-
 	
-	public void initLines()
-	{
-		line1 = new Line(origin.x, origin.y, origin.x + width, origin.y);
-		line2 = new Line(origin.x + width, origin.y, origin.x + width, origin.y + height);
-		line3 = new Line( origin.x + width, origin.y + height, origin.x, origin.y + height);
-		line4 = new Line( origin.x, origin.y + height,  origin.x, origin.y);
+	 public void initLines()
+	   	{
+	   		line1 = new Line(origin.x, origin.y, origin.x + width, origin.y);
+	   		line2 = new Line(origin.x + width, origin.y, origin.x + width, origin.y + height);
+	   		line3 = new Line( origin.x + width, origin.y + height, origin.x, origin.y + height);
+	   		line4 = new Line( origin.x, origin.y + height,  origin.x, origin.y);
 
-		arrayOfLines = new Line[]{line1, line2, line3, line4};
-	}
-	
+	   		arrayOfLines = new Line[]{line1, line2, line3, line4};
+	   	}
 	
 	public Point isCollision(Ball ball)
 	{
-		if(!initLines)initLines();
-
-		points = new ArrayList<Point>();
-		
+		super.isCollision(ball);
+		points = new ArrayList<Point>();	
 		for (int i = 0; i < 4; i++)
 		{
 			point = ball.getLine().intersect(arrayOfLines[i]); 
@@ -62,6 +54,19 @@ public class Block extends Sprite {
 	}
 
 
+	public boolean isPointOfVerticalLine(Point point)
+	{
+		
+		for (int i = 0; i < 4; i++)
+		{
+			Line line = arrayOfLines[i];
+			if(line.checkPointForLine(line.x1, line.y1, line.x2, line.y2, point.x, point.y))
+			{
+				if(line.equals(line1) || line.equals(line2)) return true;
+			}
+		}
+		return false;
+	}
 
 
 

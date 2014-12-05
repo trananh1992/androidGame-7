@@ -2,21 +2,26 @@ package org.hexlet.testproject;
 
 public class Point {
 
-	public int x;
-	public int y;
+	public float x;
+	public float y;
 	
-	public Point (int x, int y)
+	public Point (float x, float y)
 	{
 		this.x = x;
 		this.y = y;
 	}
 	
 	
-	public int calculateDistance(Point point)
+	public double calculateDistance(Point point)
 	{
-		int distance;
-		distance = (int)Math.sqrt(Math.pow(point.x - x,2) + Math.pow(point.y - y, 2));
+		double distance;
+		distance = Math.sqrt(Math.pow(point.x - x,2) + Math.pow(point.y - y, 2));
 		return distance;
+	}
+	
+	public boolean isEqualToPoint(Point point)
+	{
+		return (Math.round(x) == Math.round(point.x) && Math.round(y) == Math.round(point.y));
 	}
 }
 
