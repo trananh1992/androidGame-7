@@ -1,5 +1,6 @@
 package org.hexlet.testproject;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import android.graphics.Bitmap;
@@ -8,7 +9,7 @@ public class Ball extends Sprite {
 
 	private boolean bounce = false;
 	public float accelerate = 0.2f;
-	public float maxSpeed = 12.f;
+	public float maxSpeed = 18.f;
 	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
@@ -17,46 +18,18 @@ public class Ball extends Sprite {
 	
 	 public void update() 
      {
-//  	   if (origin.x >= gameView.getWidth() - width - xSpeed || origin.x + xSpeed <= 0) 
-//         {        
-//            changeDirection(true);
-//            
-//         }else if ( origin.y + ySpeed <= 0) 
-//         {
-//            changeDirection(false);
-//         }
-//        
-//  	   if (!bounce)
-//  	   {
-//  		 origin.x = origin.x + (float)xSpeed;
-//  	     origin.y = origin.y + (float)ySpeed;
-//  	   } else 
-//  	   {
-//  		   bounce = false;
-//  	   }
-//   	     
-//  	   if(origin.y > 1300)origin.y = 200;
-//         
-//       
-     }
-	 
-	 public void changeDirection(boolean isVertical)
-	 {
-		 if(isVertical)
+		 if(!bounce)
 		 {
-			 xSpeed = -xSpeed;
-		 } else 
-		 {
-			 ySpeed = -ySpeed;
+			 origin.x += xSpeed;
+			 origin.y += ySpeed;
 		 }
-		 xSpeed = upperSpeed(xSpeed, 5);
-         ySpeed = upperSpeed(ySpeed, 5);
-	 }
+		 bounce = false;
+     }
 	 
 	 public void start()
 	 {
-		 xSpeed = 16;
-		 ySpeed = 15;
+		 xSpeed = 13;
+		 ySpeed = -12;
 	 }
 	 
 	 public void stop()
@@ -68,77 +41,59 @@ public class Ball extends Sprite {
 	{
 		 origin.x = gameView.getWidth()/2 - width/2;
 		 origin.y = gameView.getHeight() - height*4;
-//		 origin.x = 200;
-//		 origin.y = 200;
 	}
-	public Point getCenter(){
-		
-  	   center = new Point(origin.x + width/2.f,origin.y + height/2.f);
-  	   
-  	   return center;
+	public Point getCenter()
+	{	
+  	   return new Point(origin.x + width/2.f,origin.y + height/2.f);
 	}   
-	public Line getLine()
-	{
-		center = getCenter();
-		int i = getDirection();
-		
-		switch(i)
-		{
-		case 0:
-			return new Line(origin.x + width, origin.y, origin.x + width + xSpeed, origin.y + ySpeed);
-		case 1:
-			return new Line(origin.x, origin.y, origin.x + xSpeed, origin.y + ySpeed);
-		case 2:
-			return new Line(origin.x, origin.y + height,origin.x + xSpeed, origin.y + height + ySpeed);
-		case 3:
-			return new Line(origin.x + width, origin.y + height,origin.x + xSpeed + width, origin.y + height + ySpeed);
-		}
-		
-		
-		
-		return new Line(center.x, center.y, center.x + xSpeed, center.y + ySpeed);
-	}
-	 
-	public void bounce(Point intersect, boolean isVertical)
-	{
-		bounce = true;
-		int i = getDirection();
-		
-		switch(i)
-		{
-		case 0:
-			origin.x = intersect.x - width;
-	 	    origin.y = intersect.y;
-	 	    break;
-		case 1:
-			origin.x = intersect.x;
-	 	    origin.y = intersect.y;
-	 	    break;
-		case 2:
-			origin.x = intersect.x;
-	 	    origin.y = intersect.y - height;
-	 	    break;
-		case 3:
-			origin.x = intersect.x - width;
-	 	    origin.y = intersect.y - height;
-	 	    break;
-		}
- 	    changeDirection(isVertical);
-	}
 	
-	public int getDirection()
-	{
-//		direction = 0 up, 1 left, 2 down, 3 right,
-		double dirDouble = (Math.atan2(xSpeed, ySpeed) / (Math.PI / 2) + 2);
-		int direction = (int) Math.round(dirDouble) % 4;
-		return direction;
-	}
-	
-	public Point getNextCenter()
+	 public Sprite makeBounceFromLinesWithAccuracy(ArrayList<Line> lines, float accuracy)
 	 {
-		 return new Point(center.x + xSpeed, center.y + ySpeed);
+		 float dx,dy;
+		 dx = 0;
+		 dy = 0;
+		 
+		 while(Math.abs(dx) < Math.abs(xSpeed) && Math.abs(dy) < Math.abs(ySpeed))
+		 { 
+			 dx = dx + (float)xSpeed/accuracy;
+			 dy = dy + (float)ySpeed/accuracy;
+			 for (Line line : lines)
+			 {
+				 if(checkIntersectCircleForLine(getCenter().x + dx, getCenter().y + dy, width/2, line))
+				 {
+					 double a,b,c,y;
+					 
+					 a = getAngle(0,0,dx,dy);   							//Ball angle
+					 b = getAngle(line.x1, line.y1, line.x2, line.y2);		//Line Angle
+					 y = 2.f * b - a;										//angle for future path of Ball
+					 c = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2)) + accelerate; 	//ball speed
+					 
+					 if(c > maxSpeed) c = maxSpeed;
+					 y = Math.toRadians(y);
+					 xSpeed = (float)(c * Math.cos(y));
+					 ySpeed = (float)(c * Math.sin(y)); 
+					 origin.x = origin.x + dx;
+					 origin.y = origin.y + dy;
+					 bounce = true;
+					 
+					 WeakReference<Sprite> sprite = line.sprite;
+					 if(sprite != null)
+					 { 
+						 Line lineToSpriteCenter = new Line(getCenter().x + dx, getCenter().y,
+								 		sprite.get().getCenter().x, sprite.get().getCenter().y);
+						 
+						 if(lineToSpriteCenter.intersect(line)) 
+						 {
+							 return sprite.get(); 
+						 }
+						 continue;
+					 }
+					 return null;
+				 }
+			 }
+		 }
+		 return null;
 	 }
-	 
 	 private boolean checkIntersectCircleForLine(float centerx, float centery, double radius, Line line)
 	 {
 		 float dx,dy,a,x01,x02,y01,y02;
@@ -166,74 +121,10 @@ public class Ball extends Sprite {
 		 }
 		 return result;
 	 }
+	 
+	 
 	 public double getAngle(float x1, float y1, float x2, float y2)
 		{
 			return (Math.atan2(y2 - y1, x2 - x1)) * 180 / Math.PI;
 		}
-
-	 public boolean makeBounceFromLinesWithAccuracy(ArrayList<Line> lines, float accuracy)
-	 {
-		 float dx,dy;
-		 dx = 0;
-		 dy = 0;
-		 
-
-		 while(Math.abs(dx) < Math.abs(xSpeed) && Math.abs(dy) < Math.abs(ySpeed))
-		 { 
-			 dx = dx + (float)xSpeed/accuracy;
-			 dy = dy + (float)ySpeed/accuracy;
-			 
-//			 boolean sign = true;	 
-//			 if(sign)
-//			 {
-//				if(xSpeed < 0) dx = -dx;
-//				if(ySpeed < 0) dy = -dy;
-//				sign = false;
-//			 }
-			 
-			 
-			 
-			 
-			 
-			 
-//			 boolean stop = false;
-//			 if(origin.x > gameView.getWidth() - xSpeed - width)
-//			 {
-//				 stop = true;
-//			 }
-//			 if (stop)stop = false;
-//			if(origin.y > 1122){
-//			 stop = true;
-//		 	}
-			 for (Line line : lines)
-			 {
-				 
-				 if(checkIntersectCircleForLine(getCenter().x + dx, getCenter().y + dy, width/2, line))
-				 {
-					 double a,b,c,y;
-					 
-					 a = getAngle(0,0,dx,dy);
-					 b = getAngle(line.x1, line.y1, line.x2, line.y2);
-					 y = 2.f * b - a;
-					 c = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2)) + accelerate;
-					 
-					 if(c > maxSpeed) c = maxSpeed;
-					 y = Math.toRadians(y);
-					 xSpeed = (float)(c * Math.cos(y));
-					 ySpeed = (float)(c * Math.sin(y)); 
-					
-					 
-					 origin.x = origin.x + dx;
-					 origin.y = origin.y + dy;
-					 return true;
-				 }
-			 }
-		 }
-		 return false;
-	 }
-	 
-	 
-	 
-	 
-	 
 }

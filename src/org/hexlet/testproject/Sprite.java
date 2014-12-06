@@ -1,9 +1,11 @@
 package org.hexlet.testproject;
 
+import java.lang.ref.WeakReference;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
  public class Sprite {
-    /**Объект класса GameView*/
+ 
 	 protected GameView gameView;
     
 	 protected Bitmap bmp;
@@ -26,7 +28,6 @@ import android.graphics.Canvas;
 	
 		public Sprite(GameView gameView, Bitmap bmp, float x, float y, float xSpeed, float ySpeed) 
        {
-	 		
              this.gameView=gameView;
              this.bmp=bmp;
              this.origin = new Point(x,y);
@@ -36,59 +37,50 @@ import android.graphics.Canvas;
              this.height = bmp.getHeight();
        }
  
-       /**Перемещение объекта, его направление*/
        public void update() 
        {
     	   
        }
-
-      /**Рисуем наши спрайты*/
        public void onDraw(Canvas canvas) 
        {
              update();
              canvas.drawBitmap(bmp, origin.x , origin.y, null);
        }
        
-       protected float upperSpeed(float speed, float maxSpeed){
-    	   
-    	   if(speed  <  0 && speed > -maxSpeed)
-    	   {
-    		   speed --;
-    		   
-    	   } else if ( speed > 0 && speed < maxSpeed)
-    	   {
-    		   speed++;
-    	   }   
-    	   return speed;
-       }
-       
        public Point getCenter(){
     	   if(center == null)
     	   {
-    		   center = new Point((origin.x - width/2),( origin.y - height/2));   
+    		   center = new Point(origin.x + width/2.f,origin.y + height/2.f);
+    	  	   return center;   
     	   } else 
     	   {
     		   return center;
     	   }
-    	   
-    	   return center;
        }
        
-       public Point isCollision(Ball ball)
+       public Line[] getLines()
    	{
    		if(!initLines)initLines();
-   	
-   		return null;
+   		return arrayOfLines;
    	}
        
        public void initLines()
-   	{
-   		
+   	{	   
+   	   line1 = new Line(origin.x, origin.y, origin.x + width, origin.y);
+   	   line2 = new Line(origin.x + width, origin.y, origin.x + width, origin.y + height);
+       line3 = new Line( origin.x + width, origin.y + height, origin.x, origin.y + height);
+	   line4 = new Line(origin.x, origin.y, origin.x, origin.y + height);
+	   
+	   WeakReference<Sprite> weakSelf = new WeakReference<Sprite>(this);
+	   line1.sprite = weakSelf;
+	   line2.sprite = weakSelf;
+	   line3.sprite = weakSelf;
+	   line4.sprite = weakSelf;
+	   
+	   arrayOfLines = new Line[]{line1, line2, line3, line4};
+	   initLines = true;
    	}
-       public boolean isPointOfVerticalLine(Point point)
-   	{
-    	   return false;
-   	}
+      
        
        
        

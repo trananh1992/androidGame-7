@@ -32,11 +32,9 @@ public class Platform extends Block{
 	 {
 		start = false;
 	 }
-	 public Point getCenter(){
-			
-		center = new Point((int)(origin.x - width/2),(int)( origin.y - height/2));
-	  	   
-	    return center;
+	 public Point getCenter()
+	{
+		 return new Point(origin.x + width/2.f,origin.y + height/2.f);
 	}
 	 
 	public void move(float xMove)
