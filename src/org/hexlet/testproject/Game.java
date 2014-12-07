@@ -32,7 +32,6 @@ public class Game {
 		this.gameView = gameView;
 	}
 	
-	
 	public void createObjects()
 	{
 		 ball = createBall();
@@ -57,9 +56,10 @@ public class Game {
 		if (start)
 		{
 			arrayOfLines = new ArrayList<Line>();
+			
 			addLinesFromNearestObjects();
 			addBorders();
-			arrayOfLines.add(platform.getLine());
+			addNewPlatformLines();
 			
 			spriteForDelete = ball.makeBounceFromLinesWithAccuracy(arrayOfLines, accuracyOfCalculatingIntersect);
 			deleteSprite();
@@ -75,7 +75,6 @@ public class Game {
              }
          }    
 	}
-	
 	
 	public void deleteSprite()
 	{
@@ -186,6 +185,15 @@ public class Game {
 	}
 	
 	
+	private void addNewPlatformLines()
+	{
+		Line[] lines = platform.getLines();
+		for (int i =  0; i < lines.length; i++)
+		{
+			arrayOfLines.add(lines[i]);
+		}
+	}
+	
 	
 	private void addBorders()
 	{
@@ -194,21 +202,11 @@ public class Game {
 			borderLine1 = new Line(0 , gameView.getHeight(), 0, 0);
 			borderLine2 = new Line(0 , 0, gameView.getWidth(), 0);
 			borderLine3 = new Line(gameView.getWidth(), 0, gameView.getWidth(), gameView.getHeight());
+			
 			initBorders = true;
 		}
 		arrayOfLines.add(borderLine1);
 		arrayOfLines.add(borderLine2);
 		arrayOfLines.add(borderLine3);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }

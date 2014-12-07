@@ -67,8 +67,8 @@ import android.graphics.Canvas;
        public void initLines()
    	{	   
    	   line1 = new Line(origin.x, origin.y, origin.x + width, origin.y);
-   	   line2 = new Line(origin.x + width, origin.y, origin.x + width, origin.y + height);
-       line3 = new Line( origin.x + width, origin.y + height, origin.x, origin.y + height);
+   	   line2 = new Line(origin.x + width, origin.y + height, origin.x, origin.y + height);
+       line3 = new Line(origin.x + width , origin.y, origin.x + width, origin.y + height);
 	   line4 = new Line(origin.x, origin.y, origin.x, origin.y + height);
 	   
 	   WeakReference<Sprite> weakSelf = new WeakReference<Sprite>(this);

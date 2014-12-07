@@ -9,7 +9,9 @@ public class Ball extends Sprite {
 
 	private boolean bounce = false;
 	public float accelerate = 0.2f;
-	public float maxSpeed = 18.f;
+	public float maxSpeed = 13.f;
+	private long timeLastBounce = 0;
+	
 	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
@@ -28,8 +30,8 @@ public class Ball extends Sprite {
 	 
 	 public void start()
 	 {
-		 xSpeed = 13;
-		 ySpeed = -12;
+		 xSpeed = 7;
+		 ySpeed = -8;
 	 }
 	 
 	 public void stop()
@@ -57,43 +59,94 @@ public class Ball extends Sprite {
 		 { 
 			 dx = dx + (float)xSpeed/accuracy;
 			 dy = dy + (float)ySpeed/accuracy;
+			 
 			 for (Line line : lines)
 			 {
-				 if(checkIntersectCircleForLine(getCenter().x + dx, getCenter().y + dy, width/2, line))
+				 if(checkIntersectCircleForLine(getCenter().x + dx, getCenter().y + dy, width/2, line)) 
 				 {
-					 double a,b,c,y;
 					 
-					 a = getAngle(0,0,dx,dy);   							//Ball angle
-					 b = getAngle(line.x1, line.y1, line.x2, line.y2);		//Line Angle
-					 y = 2.f * b - a;										//angle for future path of Ball
-					 c = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2)) + accelerate; 	//ball speed
-					 
-					 if(c > maxSpeed) c = maxSpeed;
-					 y = Math.toRadians(y);
-					 xSpeed = (float)(c * Math.cos(y));
-					 ySpeed = (float)(c * Math.sin(y)); 
-					 origin.x = origin.x + dx;
-					 origin.y = origin.y + dy;
-					 bounce = true;
+					 double lineAngle = Line.getAngle(line.x1, line.y1, line.x2, line.y2);
 					 
 					 WeakReference<Sprite> sprite = line.sprite;
 					 if(sprite != null)
 					 { 
+						 //if intersect with anySprite
 						 Line lineToSpriteCenter = new Line(getCenter().x + dx, getCenter().y,
 								 		sprite.get().getCenter().x, sprite.get().getCenter().y);
 						 
 						 if(lineToSpriteCenter.intersect(line)) 
 						 {
-							 return sprite.get(); 
+							//if intersect with Platform
+							 if(line.platform != null && line.platform.get().getClass().equals(Platform.class))
+							 { 
+								 return makeBounceFromPlatform(sprite, dx, dy, line);
+								 
+							 } else {
+								//if intersect with Block
+								 if(System.currentTimeMillis() - timeLastBounce < 25)
+								 {
+									return null;
+								 }
+								 bounceBall(lineAngle, dx,dy);
+								 return sprite.get();
+							 } 
 						 }
 						 continue;
 					 }
+					 bounceBall(lineAngle, dx,dy);
 					 return null;
 				 }
 			 }
+			
 		 }
 		 return null;
 	 }
+	 
+	 
+	 
+	 
+	 private Sprite makeBounceFromPlatform(WeakReference<Sprite> sprite, float dx, float dy, Line intersectLine)
+	 {
+		 if(System.currentTimeMillis() - timeLastBounce > 45)
+		 {
+			 double lineAngle;
+			 Platform platform = (Platform)sprite.get();
+		 
+			 lineAngle = platform.getAngleFromPlatformToBallCenter(new Point(getCenter().x + dx,
+				 														getCenter().y + dy),
+				 														intersectLine);
+			 bounceBall(lineAngle, dx,dy);
+			 
+		 }
+		 return null;
+	 }
+	 
+	 
+	 private void bounceBall(double lineAngle, float dx, float dy)
+	 {
+		 double ballAngle, ballSpeed, nextBallAngle; 
+		 if(System.currentTimeMillis() - timeLastBounce < 45)
+		 {
+			return;
+		 }
+		 ballAngle = Line.getAngle(0,0,dx,dy);   							
+		 nextBallAngle = 2.f * lineAngle - ballAngle;
+		 
+		 ballSpeed = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2)) + accelerate; 	
+		 
+		 if(ballSpeed > maxSpeed) ballSpeed = maxSpeed;
+		
+		 nextBallAngle = Math.toRadians(nextBallAngle);
+		 xSpeed = (float)(ballSpeed * Math.cos(nextBallAngle));
+		 ySpeed = (float)(ballSpeed * Math.sin(nextBallAngle)); 
+		 
+		 origin.x = origin.x + dx;
+		 origin.y = origin.y + dy;
+		 timeLastBounce = System.currentTimeMillis();
+		 bounce = true;
+	 }
+	 
+	 
 	 private boolean checkIntersectCircleForLine(float centerx, float centery, double radius, Line line)
 	 {
 		 float dx,dy,a,x01,x02,y01,y02;
@@ -123,8 +176,5 @@ public class Ball extends Sprite {
 	 }
 	 
 	 
-	 public double getAngle(float x1, float y1, float x2, float y2)
-		{
-			return (Math.atan2(y2 - y1, x2 - x1)) * 180 / Math.PI;
-		}
+	 
 }
