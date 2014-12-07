@@ -11,6 +11,8 @@ public class Ball extends Sprite {
 	public float accelerate = 0.2f;
 	public float maxSpeed = 13.f;
 	private long timeLastBounce = 0;
+	private float dx,dy;
+	
 	
 	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
@@ -49,9 +51,9 @@ public class Ball extends Sprite {
   	   return new Point(origin.x + width/2.f,origin.y + height/2.f);
 	}   
 	
-	 public Sprite makeBounceFromLinesWithAccuracy(ArrayList<Line> lines, float accuracy)
+	 public Sprite findLinesWithAccuracy(ArrayList<Line> lines, float accuracy)
 	 {
-		 float dx,dy;
+		 ArrayList<Line> linesWithIntersect = new ArrayList<Line>();
 		 dx = 0;
 		 dy = 0;
 		 
@@ -65,64 +67,130 @@ public class Ball extends Sprite {
 				 if(checkIntersectCircleForLine(getCenter().x + dx, getCenter().y + dy, width/2, line)) 
 				 {
 					 
-					 double lineAngle = Line.getAngle(line.x1, line.y1, line.x2, line.y2);
-					 
-					 WeakReference<Sprite> sprite = line.sprite;
-					 if(sprite != null)
-					 { 
-						 //if intersect with anySprite
-						 Line lineToSpriteCenter = new Line(getCenter().x + dx, getCenter().y,
-								 		sprite.get().getCenter().x, sprite.get().getCenter().y);
-						 
-						 if(lineToSpriteCenter.intersect(line)) 
-						 {
-							//if intersect with Platform
-							 if(line.platform != null && line.platform.get().getClass().equals(Platform.class))
-							 { 
-								 return makeBounceFromPlatform(sprite, dx, dy, line);
-								 
-							 } else {
-								//if intersect with Block
-								 if(System.currentTimeMillis() - timeLastBounce < 25)
-								 {
-									return null;
-								 }
-								 bounceBall(lineAngle, dx,dy);
-								 return sprite.get();
-							 } 
-						 }
-						 continue;
-					 }
-					 bounceBall(lineAngle, dx,dy);
-					 return null;
+					linesWithIntersect.add(line);
 				 }
 			 }
-			
+			if(linesWithIntersect.size() > 0){
+				
+				Line lineForBounce = findLineForBounce(linesWithIntersect);
+				
+				return makeBounceAndGetSpriteFromLine(lineForBounce);
+			}
 		 }
 		 return null;
 	 }
 	 
 	 
 	 
-	 
-	 private Sprite makeBounceFromPlatform(WeakReference<Sprite> sprite, float dx, float dy, Line intersectLine)
+	 private Sprite makeBounceAndGetSpriteFromLine(Line line)
 	 {
-		 if(System.currentTimeMillis() - timeLastBounce > 45)
+		 if(line.platform != null){
+			 
+			 makeBounceFromPlatform(line);
+			 return null;
+			 
+		 }else if (line.sprite != null){
+			 
+			 bounceBall(line.getAngle());
+			 return line.sprite.get();
+			 
+		 } else {
+			 
+			 bounceBall(line.getAngle());
+			 return null;
+		 }
+	 }
+	 
+	 
+	 private Line findLineForBounce(ArrayList<Line> lines)
+	 {
+		 if(lines.size() == 1)
+		 {
+			 return lines.get(0);
+			 
+		 } else if (lines.size() == 2)
+		 {
+			 return pickLineFromTwoLines(lines);
+		 } else if (lines.size() == 3 )
+		 {
+			bounceFromPlatformNearWall(lines); 
+		 } else if (lines.size() > 3){
+			 
+			 return findLineFromArrayWithManyLines(lines);
+		 }
+		 return null;
+	 } 
+	 
+	 private Line findLineFromArrayWithManyLines(ArrayList<Line> lines)
+	 {
+		 for (Line line1 : lines){
+			 for(Line line2 : lines){
+				
+				 if(line1.getAngle() == line2.getAngle()) return line1;
+			 }
+		 }
+		 return null;
+	 }
+	 
+	 
+	 private void bounceFromPlatformNearWall(ArrayList<Line> lines)
+	 {
+		 double lineAngle = Line.getAngle(getCenter().x, getCenter().y, 0,0);
+		 lineAngle += 180.f;
+		 bounceBall(lineAngle);
+	 }
+	 
+	 private Line pickLineFromTwoLines(ArrayList<Line> lines)
+	 {
+		 Line line1 = lines.get(0);
+		 Line line2 = lines.get(1);
+		 WeakReference<Sprite> sprite1 = line1.sprite;
+		 WeakReference<Sprite> sprite2 = line2.sprite;
+		 
+		 if(sprite1 != null && sprite2 != null)
+		 { 
+			 Line lineToSpriteCenter = new Line(getCenter().x + dx, getCenter().y + dy,
+				 		sprite1.get().getCenter().x, sprite1.get().getCenter().y); 
+			 
+			 if(lineToSpriteCenter.intersect(line1)) 
+			 {
+				 return line1;
+			 } else {
+				 return line2;
+			 }
+		 } else if (sprite1 == null && sprite2 == null){
+			 double angle = currentBallAngle() + 90.f;
+			 bounceBall(angle);
+			 return null;
+		 } else {
+			 return lines.get(0);
+		 }
+	 }
+	 
+	 private double currentBallAngle()
+	 {
+		 return Line.getAngle(getCenter().x, getCenter().y,getCenter().x + xSpeed, getCenter().y + ySpeed);
+	 }
+	 
+	 
+	 
+	 private Sprite makeBounceFromPlatform(Line line)
+	 {
+		 if(currentBallAngle() > 0  &&  System.currentTimeMillis() - timeLastBounce > 45)
 		 {
 			 double lineAngle;
-			 Platform platform = (Platform)sprite.get();
+			 Platform platform = line.platform.get();
 		 
 			 lineAngle = platform.getAngleFromPlatformToBallCenter(new Point(getCenter().x + dx,
 				 														getCenter().y + dy),
-				 														intersectLine);
-			 bounceBall(lineAngle, dx,dy);
-			 
+				 														line);
+			 bounceBall(lineAngle);
 		 }
 		 return null;
 	 }
 	 
 	 
-	 private void bounceBall(double lineAngle, float dx, float dy)
+	 private void bounceBall(double lineAngle)
 	 {
 		 double ballAngle, ballSpeed, nextBallAngle; 
 		 if(System.currentTimeMillis() - timeLastBounce < 45)

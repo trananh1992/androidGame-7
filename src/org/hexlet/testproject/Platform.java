@@ -44,7 +44,6 @@ public class Platform extends Block{
 		this.xMove = xMove;
 	}
 
-	
 	public void initLines()
    	{	   
    	   line1 = new Line(origin.x, origin.y, origin.x + width, origin.y);
@@ -82,15 +81,5 @@ public class Platform extends Block{
 		
 		return lineAngle;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+		
 }

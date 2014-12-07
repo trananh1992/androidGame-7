@@ -60,7 +60,10 @@ public class Line extends Object{
 	}
 	
 	
-	
+	public double getAngle()
+	{
+		return (Math.atan2(y2 - y1, x2 - x1)) * 180 / Math.PI;
+	}
 	
 	
 	

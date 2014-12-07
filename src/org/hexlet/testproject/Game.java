@@ -61,7 +61,7 @@ public class Game {
 			addBorders();
 			addNewPlatformLines();
 			
-			spriteForDelete = ball.makeBounceFromLinesWithAccuracy(arrayOfLines, accuracyOfCalculatingIntersect);
+			spriteForDelete = ball.findLinesWithAccuracy(arrayOfLines, accuracyOfCalculatingIntersect);
 			deleteSprite();
 		}
 		
@@ -133,9 +133,9 @@ public class Game {
 			for (int j = 0; j < verticalCount; j++)
 			{
 				points.add(new Point(positionX, positionY));
-				positionY += bmp.getHeight() + 2;
+				positionY += bmp.getHeight() +1;
 			}
-			positionX += bmp.getWidth()+2;
+			positionX += bmp.getWidth() +1;
 			positionY = bmp.getWidth();
 		}
 		return points;
