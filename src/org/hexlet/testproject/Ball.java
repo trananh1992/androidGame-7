@@ -12,6 +12,8 @@ public class Ball extends Sprite {
 	public float maxSpeed = 12.f;
 	private long timeLastBounce = 0;
 	private float dx,dy;
+	private float savedXSpeed;
+	private float savedYSpeed;
 	private ArrayList<Sprite> spritesForDelete;
 	
 	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
@@ -32,14 +34,26 @@ public class Ball extends Sprite {
 	 
 	 public void start()
 	 {
-		 xSpeed = 6;
-		 ySpeed = -6;
+		 if(savedXSpeed == 0 && savedYSpeed == 0){
+			 xSpeed = 6;
+			 ySpeed = -6;
+		 } else {
+			 xSpeed = savedXSpeed;
+			 ySpeed = savedYSpeed;
+		 }
 	 }
 	 
 	 public void stop()
 	 {
+		 savedXSpeed = xSpeed;
+		 savedYSpeed = ySpeed;
 		 xSpeed = 0;
 		 ySpeed = 0;		 
+	 }
+	 public void refreshSpeed()
+	 {
+		 savedXSpeed = 0;
+		 savedYSpeed = 0;
 	 }
 	 public void startPosition()
 	{

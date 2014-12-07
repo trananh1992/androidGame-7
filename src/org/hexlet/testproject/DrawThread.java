@@ -5,28 +5,20 @@ import android.graphics.Canvas;
 @SuppressLint("WrongCall")
 public class DrawThread extends Thread
 {
-       /**Наша скорость в мс = 10*/
-       static final long FPS = 50;
-      
-       /**Объект класса GameView*/
-       private GameView view; 
 
-       /**Задаем состояние потока*/
+       static final long FPS = 50;
+       private GameView view; 
        private boolean running = false;
-      
-       /**Конструктор класса*/
+
        public DrawThread(GameView view) 
        {
              this.view = view;
        }
  
-        /**Задание состояния потока*/
        public void setRunning(boolean run) 
        {
              running = run;
        }
- 
-       /** Действия, выполняемые в потоке */
  
        @Override
        public void run() 

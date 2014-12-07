@@ -29,7 +29,7 @@ public class MainActivity extends Activity implements OnTouchListener {
 		    {
 		    case MotionEvent.ACTION_DOWN: 
 
-		    	if(!gameView.game.start) gameView.game.start();
+		    	if(!gameView.game.start) gameView.game.start(); else gameView.game.pause();
 		      break;
 		    case MotionEvent.ACTION_MOVE: 
 		    	gameView.game.platform.move(x - gameView.game.platform.width/2);

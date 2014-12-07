@@ -15,7 +15,7 @@ public class Game {
     private ArrayList<Sprite> spritesForDelete;  
     private List<Sprite>nearObjects;
     private List<Block> blocks = new ArrayList<Block>();
-    public boolean blockCreated = false;
+    public boolean prepareForGame = false;
     public boolean start = false;
     public Platform platform;
     public Ball ball;
@@ -27,6 +27,7 @@ public class Game {
 	private Line borderLine1;
 	private Line borderLine2;
 	private Line borderLine3;
+	private int lives;
 	public Game(GameView gameView)
 	{
 		this.gameView = gameView;
@@ -42,16 +43,7 @@ public class Game {
 	{
 		canvas.drawColor(Color.BLACK);
 		
-		if(!start)
-        {
-			platform.startPosition();
-			ball.startPosition();	 
-        }
-		if (!blockCreated)
-		{
-			createBlocks();
-			blockCreated = true;
-		}
+		checkAlive();
 		
 		if (start)
 		{
@@ -76,7 +68,7 @@ public class Game {
          }    
 	}
 	
-	public void deleteSprite()
+	private void deleteSprite()
 	{
 		if(spritesForDelete != null )
 		{
@@ -86,12 +78,53 @@ public class Game {
 			}
 		}
 	}
+	
+	private void checkAlive()
+	{
+		if (!prepareForGame) prepareForGame();
+		if(ball.origin.y > gameView.getHeight()){
+			lives --;
+			prepareForGame = false;
+		}
+		if (lives < 3)
+		{
+			//You lose!
+			ball.stop();
+		}
+		if (blocks.isEmpty())
+		{
+			//You win!
+			ball.stop();
+		}
+	}
     
+	private void prepareForGame()
+	{
+		if(lives < 1)
+		{
+			platform.startPosition();	
+			createBlocks();
+			lives = 3;
+		}
+		ball.stop();
+		ball.refreshSpeed();
+		platform.stop();
+		ball.startPosition();
+		start = false;
+		prepareForGame = true;
+	}
+	
 	public void start()
 	{	
 		ball.start();
 		platform.start();
-		start = true;
+		start = true;	
+	}
+	public void pause()
+	{
+		ball.stop();
+		platform.stop();
+		start = false;
 	}
 	
 	private Platform createPlatform(){
