@@ -14,6 +14,7 @@ public class Ball extends Sprite {
 	private float dx,dy;
 	private float savedXSpeed;
 	private float savedYSpeed;
+	private boolean refresh = false;
 	private ArrayList<Sprite> spritesForDelete;
 	
 	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
@@ -34,9 +35,10 @@ public class Ball extends Sprite {
 	 
 	 public void start()
 	 {
-		 if(savedXSpeed == 0 && savedYSpeed == 0){
+		 if(refresh || savedXSpeed == 0 && savedYSpeed == 0){
 			 xSpeed = 6;
 			 ySpeed = -6;
+			 refresh = false;
 		 } else {
 			 xSpeed = savedXSpeed;
 			 ySpeed = savedYSpeed;
@@ -50,15 +52,12 @@ public class Ball extends Sprite {
 		 xSpeed = 0;
 		 ySpeed = 0;		 
 	 }
-	 public void refreshSpeed()
-	 {
-		 savedXSpeed = 0;
-		 savedYSpeed = 0;
-	 }
+	 
 	 public void startPosition()
 	{
 		 origin.x = gameView.getWidth()/2 - width/2;
 		 origin.y = gameView.getHeight() - 50 - height;
+		 refresh = true;
 	}
 	public Point getCenter()
 	{	

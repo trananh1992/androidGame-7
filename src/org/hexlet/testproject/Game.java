@@ -28,6 +28,8 @@ public class Game {
 	private Line borderLine2;
 	private Line borderLine3;
 	private int lives;
+	private int score = 0;
+	private int scoreForScreen = 0;
 	public Game(GameView gameView)
 	{
 		this.gameView = gameView;
@@ -56,16 +58,17 @@ public class Game {
 			spritesForDelete = ball.findLinesWithAccuracy(arrayOfLines, accuracyOfCalculatingIntersect);
 			deleteSprite();
 		}
+		updateScore();
 		
-         ball.onDraw(canvas);
-         platform.onDraw(canvas);
-         if(!blocks.isEmpty())
-         {
-        	 for(Block block : blocks)
-             { 
-            	 block.onDraw(canvas);
-             }
-         }    
+        ball.onDraw(canvas);
+        platform.onDraw(canvas);
+        if(!blocks.isEmpty())
+        {
+        	for(Block block : blocks)
+        	{ 
+        		block.onDraw(canvas);
+        	}	
+        }    
 	}
 	
 	private void deleteSprite()
@@ -75,8 +78,17 @@ public class Game {
 			for(Sprite sprite : spritesForDelete)
 			{
 				blocks.remove(sprite);
+				score += 150;
 			}
 		}
+	}
+	
+	private void updateScore()
+	{
+		if (scoreForScreen < score){
+			scoreForScreen ++;
+		}
+		// place For score update
 	}
 	
 	private void checkAlive()
@@ -86,7 +98,7 @@ public class Game {
 			lives --;
 			prepareForGame = false;
 		}
-		if (lives < 3)
+		if (lives < 1)
 		{
 			//You lose!
 			ball.stop();
@@ -107,7 +119,6 @@ public class Game {
 			lives = 3;
 		}
 		ball.stop();
-		ball.refreshSpeed();
 		platform.stop();
 		ball.startPosition();
 		start = false;
