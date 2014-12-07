@@ -9,10 +9,10 @@ public class Ball extends Sprite {
 
 	private boolean bounce = false;
 	public float accelerate = 0.2f;
-	public float maxSpeed = 13.f;
+	public float maxSpeed = 12.f;
 	private long timeLastBounce = 0;
 	private float dx,dy;
-	
+	private ArrayList<Sprite> spritesForDelete;
 	
 	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
@@ -32,8 +32,8 @@ public class Ball extends Sprite {
 	 
 	 public void start()
 	 {
-		 xSpeed = 7;
-		 ySpeed = -8;
+		 xSpeed = 6;
+		 ySpeed = -6;
 	 }
 	 
 	 public void stop()
@@ -44,15 +44,16 @@ public class Ball extends Sprite {
 	 public void startPosition()
 	{
 		 origin.x = gameView.getWidth()/2 - width/2;
-		 origin.y = gameView.getHeight() - height*4;
+		 origin.y = gameView.getHeight() - 50 - height;
 	}
 	public Point getCenter()
 	{	
   	   return new Point(origin.x + width/2.f,origin.y + height/2.f);
 	}   
 	
-	 public Sprite findLinesWithAccuracy(ArrayList<Line> lines, float accuracy)
+	 public ArrayList<Sprite> findLinesWithAccuracy(ArrayList<Line> lines, float accuracy)
 	 {
+		 spritesForDelete = new ArrayList<Sprite>();
 		 ArrayList<Line> linesWithIntersect = new ArrayList<Line>();
 		 dx = 0;
 		 dy = 0;
@@ -74,7 +75,9 @@ public class Ball extends Sprite {
 				
 				Line lineForBounce = findLineForBounce(linesWithIntersect);
 				
-				return makeBounceAndGetSpriteFromLine(lineForBounce);
+				makeBounceAndGetSpriteFromLine(lineForBounce);
+				
+				return spritesForDelete;
 			}
 		 }
 		 return null;
@@ -82,22 +85,14 @@ public class Ball extends Sprite {
 	 
 	 
 	 
-	 private Sprite makeBounceAndGetSpriteFromLine(Line line)
+	 private void makeBounceAndGetSpriteFromLine(Line line)
 	 {
 		 if(line.platform != null){
 			 
 			 makeBounceFromPlatform(line);
-			 return null;
 			 
-		 }else if (line.sprite != null){
-			 
+		 }else {
 			 bounceBall(line.getAngle());
-			 return line.sprite.get();
-			 
-		 } else {
-			 
-			 bounceBall(line.getAngle());
-			 return null;
 		 }
 	 }
 	 
@@ -106,6 +101,10 @@ public class Ball extends Sprite {
 	 {
 		 if(lines.size() == 1)
 		 {
+			 if(lines.get(0).sprite != null && lines.get(0).sprite.get().getClass() != Platform.class )
+			 {
+				 spritesForDelete.add(lines.get(0).sprite.get());
+			 }
 			 return lines.get(0);
 			 
 		 } else if (lines.size() == 2)
@@ -126,7 +125,12 @@ public class Ball extends Sprite {
 		 for (Line line1 : lines){
 			 for(Line line2 : lines){
 				
-				 if(line1.getAngle() == line2.getAngle()) return line1;
+				 if(line1.getAngle() == line2.getAngle() && !line1.equals(line2))
+				 {
+					spritesForDelete.add(line1.sprite.get());
+					spritesForDelete.add(line2.sprite.get());
+					return line1;
+				 } 
 			 }
 		 }
 		 return null;
@@ -148,9 +152,19 @@ public class Ball extends Sprite {
 		 WeakReference<Sprite> sprite2 = line2.sprite;
 		 
 		 if(sprite1 != null && sprite2 != null)
-		 { 
+		 { 			 
 			 Line lineToSpriteCenter = new Line(getCenter().x + dx, getCenter().y + dy,
-				 		sprite1.get().getCenter().x, sprite1.get().getCenter().y); 
+					 sprite1.get().getCenter().x, sprite1.get().getCenter().y); 
+			 
+			 if(sprite1.get().getClass() != Platform.class && sprite1.get().equals(sprite2.get()))
+			 {
+				 spritesForDelete.add(sprite1.get());
+				 
+			 } else if (!sprite1.get().equals(sprite1.get()))
+			 {
+				 spritesForDelete.add(sprite1.get());
+				 spritesForDelete.add(sprite2.get());
+			 }
 			 
 			 if(lineToSpriteCenter.intersect(line1)) 
 			 {
@@ -162,9 +176,14 @@ public class Ball extends Sprite {
 			 double angle = currentBallAngle() + 90.f;
 			 bounceBall(angle);
 			 return null;
-		 } else {
-			 return lines.get(0);
-		 }
+		 }/* else if (sprite1.get().getClass() == Platform.class)
+		 {
+			 double angle = currentBallAngle() + 90.f;
+			 bounceBall(angle);
+			 spritesForDelete.add(line1.sprite.get());
+			 return line1;
+		 }*/
+		 return null;
 	 }
 	 
 	 private double currentBallAngle()

@@ -12,7 +12,7 @@ import android.graphics.Color;
 @SuppressLint("WrongCall")
 public class Game {
 
-    private Sprite spriteForDelete;  
+    private ArrayList<Sprite> spritesForDelete;  
     private List<Sprite>nearObjects;
     private List<Block> blocks = new ArrayList<Block>();
     public boolean blockCreated = false;
@@ -61,7 +61,7 @@ public class Game {
 			addBorders();
 			addNewPlatformLines();
 			
-			spriteForDelete = ball.findLinesWithAccuracy(arrayOfLines, accuracyOfCalculatingIntersect);
+			spritesForDelete = ball.findLinesWithAccuracy(arrayOfLines, accuracyOfCalculatingIntersect);
 			deleteSprite();
 		}
 		
@@ -78,10 +78,12 @@ public class Game {
 	
 	public void deleteSprite()
 	{
-		if(spriteForDelete != null)
+		if(spritesForDelete != null )
 		{
-			blocks.remove(spriteForDelete);
-			spriteForDelete = null;
+			for(Sprite sprite : spritesForDelete)
+			{
+				blocks.remove(sprite);
+			}
 		}
 	}
     

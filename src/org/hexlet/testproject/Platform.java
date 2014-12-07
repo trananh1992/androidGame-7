@@ -22,7 +22,7 @@ public class Platform extends Block{
 	public void startPosition()
 	{
 		origin.x = gameView.getWidth()/2 - width/2;
-		origin.y = gameView.getHeight() - height*2;
+		origin.y = gameView.getHeight() - 50;
 		xMove = gameView.getWidth()/2 - width/2;
 	}
 	public void start()
