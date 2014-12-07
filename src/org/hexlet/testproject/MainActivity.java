@@ -13,7 +13,8 @@ public class MainActivity extends Activity implements OnTouchListener {
 	 public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
-
+        
+        
         gameView = new GameView(this);
         gameView.setOnTouchListener(this);
         
@@ -27,6 +28,7 @@ public class MainActivity extends Activity implements OnTouchListener {
 		    switch (event.getAction()) 
 		    {
 		    case MotionEvent.ACTION_DOWN: 
+
 		    	if(!gameView.game.start) gameView.game.start();
 		      break;
 		    case MotionEvent.ACTION_MOVE: 
