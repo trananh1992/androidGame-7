@@ -195,13 +195,7 @@ public class Ball extends Sprite {
 			 bounceBall(angle);
 			 soundForBorder = true;
 			 return null;
-		 }/* else if (sprite1.get().getClass() == Platform.class)
-		 {
-			 double angle = currentBallAngle() + 90.f;
-			 bounceBall(angle);
-			 spritesForDelete.add(line1.sprite.get());
-			 return line1;
-		 }*/
+		 }
 		 return null;
 	 }
 	 

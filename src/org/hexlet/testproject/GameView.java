@@ -19,8 +19,6 @@ public class GameView extends SurfaceView {
           super(context);
           gameLoopThread = new DrawThread(this);
           holder = getHolder();
-          
-          /*Рисуем все наши объекты и все все все*/
           holder.addCallback(new SurfaceHolder.Callback() 
           {
         	  	public void surfaceCreated(SurfaceHolder holder) 

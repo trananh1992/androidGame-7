@@ -12,7 +12,7 @@ public class Platform extends Block{
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
 	}
 	
-	
+
 	public void update() 
     {	
 		if(start)origin.x = (int)xMove;
