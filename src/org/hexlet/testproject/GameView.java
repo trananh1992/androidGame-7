@@ -12,19 +12,20 @@ public class GameView extends SurfaceView {
     
     private SurfaceHolder holder;
     private DrawThread gameLoopThread;
-
+    private GameView  gameView = this;
     
     public GameView(Context context) 
     {
           super(context);
           gameLoopThread = new DrawThread(this);
           holder = getHolder();
-          
-          /*Рисуем все наши объекты и все все все*/
           holder.addCallback(new SurfaceHolder.Callback() 
           {
         	  	public void surfaceCreated(SurfaceHolder holder) 
         	  	{
+        	  		if(gameLoopThread == null){
+        	  			gameLoopThread = new DrawThread(gameView);
+        	  		}
                      gameLoopThread.setRunning(true);
                      gameLoopThread.start();
         	  	}
@@ -51,6 +52,7 @@ public class GameView extends SurfaceView {
                                {
                                }
                         }
+                        gameLoopThread = null;
                 }                
           });  
           game = getGame();
@@ -60,7 +62,10 @@ public class GameView extends SurfaceView {
     protected void onDraw(Canvas canvas) 
     {
     	game = getGame();
-        game.drawOnCanvas(canvas);
+    	if(canvas != null)
+    	{
+    		game.drawOnCanvas(canvas);
+    	}
     }
        
     public  Game getGame()

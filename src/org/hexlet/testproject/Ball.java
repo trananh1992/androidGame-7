@@ -1,142 +1,250 @@
 package org.hexlet.testproject;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import android.graphics.Bitmap;
 
 public class Ball extends Sprite {
 
+	public boolean soundForBorder;
 	private boolean bounce = false;
 	public float accelerate = 0.2f;
 	public float maxSpeed = 12.f;
+	private long timeLastBounce = 0;
+	private float dx,dy;
+	private float savedXSpeed;
+	private float savedYSpeed;
+	private boolean refresh = false;
+	
+	private ArrayList<Sprite> spritesForDelete;
+	
 	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
 		this.stop();
+		
 	}
 	
 	 public void update() 
      {
-//  	   if (origin.x >= gameView.getWidth() - width - xSpeed || origin.x + xSpeed <= 0) 
-//         {        
-//            changeDirection(true);
-//            
-//         }else if ( origin.y + ySpeed <= 0) 
-//         {
-//            changeDirection(false);
-//         }
-//        
-//  	   if (!bounce)
-//  	   {
-//  		 origin.x = origin.x + (float)xSpeed;
-//  	     origin.y = origin.y + (float)ySpeed;
-//  	   } else 
-//  	   {
-//  		   bounce = false;
-//  	   }
-//   	     
-//  	   if(origin.y > 1300)origin.y = 200;
-//         
-//       
-     }
-	 
-	 public void changeDirection(boolean isVertical)
-	 {
-		 if(isVertical)
+		 if(!bounce)
 		 {
-			 xSpeed = -xSpeed;
-		 } else 
-		 {
-			 ySpeed = -ySpeed;
+			 origin.x += xSpeed;
+			 origin.y += ySpeed;
 		 }
-		 xSpeed = upperSpeed(xSpeed, 5);
-         ySpeed = upperSpeed(ySpeed, 5);
-	 }
+		 bounce = false;
+     }
 	 
 	 public void start()
 	 {
-		 xSpeed = 16;
-		 ySpeed = 15;
+		 if(refresh || savedXSpeed == 0 && savedYSpeed == 0){
+			 xSpeed = 6;
+			 ySpeed = -6;
+			 refresh = false;
+		 } else {
+			 xSpeed = savedXSpeed;
+			 ySpeed = savedYSpeed;
+		 }
 	 }
 	 
 	 public void stop()
 	 {
+		 savedXSpeed = xSpeed;
+		 savedYSpeed = ySpeed;
 		 xSpeed = 0;
 		 ySpeed = 0;		 
 	 }
+	 
 	 public void startPosition()
 	{
 		 origin.x = gameView.getWidth()/2 - width/2;
-		 origin.y = gameView.getHeight() - height*4;
-//		 origin.x = 200;
-//		 origin.y = 200;
+		 origin.y = gameView.getHeight() - 50 - height * 3;
+		 refresh = true;
 	}
-	public Point getCenter(){
-		
-  	   center = new Point(origin.x + width/2.f,origin.y + height/2.f);
-  	   
-  	   return center;
+	public Point getCenter()
+	{	
+  	   return new Point(origin.x + width/2.f,origin.y + height/2.f);
 	}   
-	public Line getLine()
-	{
-		center = getCenter();
-		int i = getDirection();
-		
-		switch(i)
-		{
-		case 0:
-			return new Line(origin.x + width, origin.y, origin.x + width + xSpeed, origin.y + ySpeed);
-		case 1:
-			return new Line(origin.x, origin.y, origin.x + xSpeed, origin.y + ySpeed);
-		case 2:
-			return new Line(origin.x, origin.y + height,origin.x + xSpeed, origin.y + height + ySpeed);
-		case 3:
-			return new Line(origin.x + width, origin.y + height,origin.x + xSpeed + width, origin.y + height + ySpeed);
-		}
-		
-		
-		
-		return new Line(center.x, center.y, center.x + xSpeed, center.y + ySpeed);
-	}
-	 
-	public void bounce(Point intersect, boolean isVertical)
-	{
-		bounce = true;
-		int i = getDirection();
-		
-		switch(i)
-		{
-		case 0:
-			origin.x = intersect.x - width;
-	 	    origin.y = intersect.y;
-	 	    break;
-		case 1:
-			origin.x = intersect.x;
-	 	    origin.y = intersect.y;
-	 	    break;
-		case 2:
-			origin.x = intersect.x;
-	 	    origin.y = intersect.y - height;
-	 	    break;
-		case 3:
-			origin.x = intersect.x - width;
-	 	    origin.y = intersect.y - height;
-	 	    break;
-		}
- 	    changeDirection(isVertical);
-	}
 	
-	public int getDirection()
-	{
-//		direction = 0 up, 1 left, 2 down, 3 right,
-		double dirDouble = (Math.atan2(xSpeed, ySpeed) / (Math.PI / 2) + 2);
-		int direction = (int) Math.round(dirDouble) % 4;
-		return direction;
-	}
-	
-	public Point getNextCenter()
+	 public ArrayList<Sprite> findSpritesWichIntersectsBall(ArrayList<Line> lines, float accuracy)
 	 {
-		 return new Point(center.x + xSpeed, center.y + ySpeed);
+		 spritesForDelete = new ArrayList<Sprite>();
+		 ArrayList<Line> linesWithIntersect = new ArrayList<Line>();
+		 dx = 0;
+		 dy = 0;
+		 
+		 while(Math.abs(dx) < Math.abs(xSpeed) && Math.abs(dy) < Math.abs(ySpeed))
+		 { 
+			 dx = dx + (float)xSpeed/accuracy;
+			 dy = dy + (float)ySpeed/accuracy;
+			 
+			 for (Line line : lines)
+			 {
+				 if(checkIntersectCircleForLine(getCenter().x + dx, getCenter().y + dy, width/2, line)) 
+				 {
+					 
+					linesWithIntersect.add(line);
+				 }
+			 }
+			if(linesWithIntersect.size() > 0){
+				
+				Line lineForBounce = findLineForBounce(linesWithIntersect);
+				
+				makeBounceAndGetSpriteFromLine(lineForBounce);
+				
+				return spritesForDelete;
+			}
+		 }
+		 return null;
+	 }
+	 
+	 
+	 
+	 private void makeBounceAndGetSpriteFromLine(Line line)
+	 {
+		 if(line.platform != null){
+			 
+			 makeBounceFromPlatform(line);
+			 
+		 }else {
+			 bounceBall(line.getAngle());
+			 soundForBorder = true;
+		 }
+	 }
+	 
+	 
+	 private Line findLineForBounce(ArrayList<Line> lines)
+	 {
+		 if(lines.size() == 1)
+		 {
+			 if(lines.get(0).sprite != null && lines.get(0).sprite.get().getClass() != Platform.class )
+			 {
+				 spritesForDelete.add(lines.get(0).sprite.get());
+			 }
+			 return lines.get(0);
+			 
+		 } else if (lines.size() == 2)
+		 {
+			 return pickLineFromTwoLines(lines);
+		 } else if (lines.size() == 3 )
+		 {
+			bounceFromPlatformNearWall(lines); 
+		 } else if (lines.size() > 3){
+			 
+			 return findLineFromArrayWithManyLines(lines);
+		 }
+		 return null;
+	 } 
+	 
+	 private Line findLineFromArrayWithManyLines(ArrayList<Line> lines)
+	 {
+		 for (Line line1 : lines){
+			 for(Line line2 : lines){
+				
+				 if(line1.getAngle() == line2.getAngle() && !line1.equals(line2))
+				 {
+					spritesForDelete.add(line1.sprite.get());
+					spritesForDelete.add(line2.sprite.get());
+					return line1;
+				 } 
+			 }
+		 }
+		 return null;
+	 }
+	 
+	 
+	 private void bounceFromPlatformNearWall(ArrayList<Line> lines)
+	 {
+		 double lineAngle = Line.getAngle(getCenter().x, getCenter().y, 0,0);
+		 lineAngle += 180.f;
+		 bounceBall(lineAngle);
+		 soundForBorder = true;
+	 }
+	 
+	 private Line pickLineFromTwoLines(ArrayList<Line> lines)
+	 {
+		 Line line1 = lines.get(0);
+		 Line line2 = lines.get(1);
+		 WeakReference<Sprite> sprite1 = line1.sprite;
+		 WeakReference<Sprite> sprite2 = line2.sprite;
+		 
+		 if(sprite1 != null && sprite2 != null)
+		 { 			 
+			 Line lineToSpriteCenter = new Line(getCenter().x + dx, getCenter().y + dy,
+					 sprite1.get().getCenter().x, sprite1.get().getCenter().y); 
+			 
+			 if(sprite1.get().getClass() != Platform.class && sprite1.get().equals(sprite2.get()))
+			 {
+				 spritesForDelete.add(sprite1.get());
+				 
+			 } else if (!sprite1.get().equals(sprite1.get()))
+			 {
+				 spritesForDelete.add(sprite1.get());
+				 spritesForDelete.add(sprite2.get());
+			 }
+			 
+			 if(lineToSpriteCenter.intersect(line1)) 
+			 {
+				 return line1;
+			 } else {
+				 return line2;
+			 }
+		 } else if (sprite1 == null && sprite2 == null){
+			 double angle = currentBallAngle() + 90.f;
+			 bounceBall(angle);
+			 soundForBorder = true;
+			 return null;
+		 }
+		 return null;
+	 }
+	 
+	 private double currentBallAngle()
+	 {
+		 return Line.getAngle(getCenter().x, getCenter().y,getCenter().x + xSpeed, getCenter().y + ySpeed);
+	 }
+	 
+	 
+	 
+	 private Sprite makeBounceFromPlatform(Line line)
+	 {
+		 if(currentBallAngle() > 0  &&  System.currentTimeMillis() - timeLastBounce > 45)
+		 {
+			 double lineAngle;
+			 Platform platform = line.platform.get();
+		 
+			 lineAngle = platform.getAngleFromPlatformToBallCenter(new Point(getCenter().x + dx,
+				 														getCenter().y + dy),
+				 														line);
+			 bounceBall(lineAngle);
+			 soundForBorder = true;
+		 }
+		 return null;
+	 }
+	 
+	 
+	 private void bounceBall(double lineAngle)
+	 {
+		 double ballAngle, ballSpeed, nextBallAngle; 
+		 if(System.currentTimeMillis() - timeLastBounce < 45)
+		 {
+			return;
+		 }
+		 ballAngle = Line.getAngle(0,0,dx,dy);   							
+		 nextBallAngle = 2.f * lineAngle - ballAngle;
+		 
+		 ballSpeed = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2)) + accelerate; 	
+		 
+		 if(ballSpeed > maxSpeed) ballSpeed = maxSpeed;
+		
+		 nextBallAngle = Math.toRadians(nextBallAngle);
+		 xSpeed = (float)(ballSpeed * Math.cos(nextBallAngle));
+		 ySpeed = (float)(ballSpeed * Math.sin(nextBallAngle)); 
+		 
+		 origin.x = origin.x + dx;
+		 origin.y = origin.y + dy;
+		 timeLastBounce = System.currentTimeMillis();
+		 bounce = true;
 	 }
 	 
 	 private boolean checkIntersectCircleForLine(float centerx, float centery, double radius, Line line)
@@ -166,73 +274,6 @@ public class Ball extends Sprite {
 		 }
 		 return result;
 	 }
-	 public double getAngle(float x1, float y1, float x2, float y2)
-		{
-			return (Math.atan2(y2 - y1, x2 - x1)) * 180 / Math.PI;
-		}
-
-	 public boolean makeBounceFromLinesWithAccuracy(ArrayList<Line> lines, float accuracy)
-	 {
-		 float dx,dy;
-		 dx = 0;
-		 dy = 0;
-		 
-
-		 while(Math.abs(dx) < Math.abs(xSpeed) && Math.abs(dy) < Math.abs(ySpeed))
-		 { 
-			 dx = dx + (float)xSpeed/accuracy;
-			 dy = dy + (float)ySpeed/accuracy;
-			 
-//			 boolean sign = true;	 
-//			 if(sign)
-//			 {
-//				if(xSpeed < 0) dx = -dx;
-//				if(ySpeed < 0) dy = -dy;
-//				sign = false;
-//			 }
-			 
-			 
-			 
-			 
-			 
-			 
-//			 boolean stop = false;
-//			 if(origin.x > gameView.getWidth() - xSpeed - width)
-//			 {
-//				 stop = true;
-//			 }
-//			 if (stop)stop = false;
-//			if(origin.y > 1122){
-//			 stop = true;
-//		 	}
-			 for (Line line : lines)
-			 {
-				 
-				 if(checkIntersectCircleForLine(getCenter().x + dx, getCenter().y + dy, width/2, line))
-				 {
-					 double a,b,c,y;
-					 
-					 a = getAngle(0,0,dx,dy);
-					 b = getAngle(line.x1, line.y1, line.x2, line.y2);
-					 y = 2.f * b - a;
-					 c = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2)) + accelerate;
-					 
-					 if(c > maxSpeed) c = maxSpeed;
-					 y = Math.toRadians(y);
-					 xSpeed = (float)(c * Math.cos(y));
-					 ySpeed = (float)(c * Math.sin(y)); 
-					
-					 
-					 origin.x = origin.x + dx;
-					 origin.y = origin.y + dy;
-					 return true;
-				 }
-			 }
-		 }
-		 return false;
-	 }
-	 
-	 
 	 
 	 
 	 

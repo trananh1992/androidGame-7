@@ -1,5 +1,7 @@
 package org.hexlet.testproject;
 
+import java.lang.ref.WeakReference;
+
 public class Line extends Object{
 
 	public float x1;
@@ -13,23 +15,25 @@ public class Line extends Object{
 	
 	public float x;
 	public float y;
+	
+	public WeakReference<Sprite> sprite;
+	public WeakReference<Platform> platform;
+	
 	public Line(float x1, float y1, float x2, float y2){
 		this.x1 = x1;
 		this.x2 = x2;
 		this.y1 = y1;
 		this.y2 = y2;
-	
-		
 	}
 	
-	public Point intersect(Line line)
+	public boolean intersect(Line line)
 	{
 		x3 = line.x1;
 		y3 = line.y1;
 		x4 = line.x2;
 		y4 = line.y2;
 		
-		if (((y1-y2)*(x4-x3)-(y3-y4)*(x2-x1)) == 0 || (x4-x3) == 0) return null;
+		if (((y1-y2)*(x4-x3)-(y3-y4)*(x2-x1)) == 0 || (x4-x3) == 0) return false;
 		
 		x = -((x1*y2-x2*y1)*(x4-x3)-(x3*y4-x4*y3)*(x2-x1))/((y1-y2)*(x4-x3)-(y3-y4)*(x2-x1));
 		y = ((y3-y4)*(-x)-(x3*y4-x4*y3))/(x4-x3);
@@ -37,12 +41,9 @@ public class Line extends Object{
 		
 		boolean firstLine = checkPointForLine(x1,y1,x2,y2,x,y);
 		boolean secondLine = checkPointForLine(x3,y3,x4,y4,x,y);
-		
-		if(firstLine && secondLine) return new Point(x,y);
-
-		return null;		
-	}
 	
+		return (firstLine && secondLine);		
+	}
 	
 	public boolean checkPointForLine(float x1, float y1, float x2, float y2, float X, float Y)
 	{
@@ -53,10 +54,16 @@ public class Line extends Object{
 		return false;
 	}
 	
+	public static double getAngle(float x1, float y1, float x2, float y2)
+	{
+		return (Math.atan2(y2 - y1, x2 - x1)) * 180 / Math.PI;
+	}
 	
 	
-	
-	
+	public double getAngle()
+	{
+		return (Math.atan2(y2 - y1, x2 - x1)) * 180 / Math.PI;
+	}
 	
 	
 	
