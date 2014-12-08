@@ -8,15 +8,20 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.media.AudioManager;
+import android.media.SoundPool;
 
 @SuppressLint("WrongCall")
 public class Game {
-
     private ArrayList<Sprite> spritesForDelete;  
     private List<Sprite>nearObjects;
     private List<Block> blocks = new ArrayList<Block>();
+    private List<Sprite> lives;
+//    private Sprite pauseSprite;
     public boolean prepareForGame = false;
     public boolean start = false;
+    public boolean showTitle = false;
     public Platform platform;
     public Ball ball;
     private Bitmap bmp;
@@ -27,12 +32,23 @@ public class Game {
 	private Line borderLine1;
 	private Line borderLine2;
 	private Line borderLine3;
-	private int lives;
+	private int livesCount;
 	private int score = 0;
 	private int scoreForScreen = 0;
+	private Paint paint;
+	private SoundPool sounds;
+//	private int borderSound;
+	private int blockSound;
+	private int deathSound;
+	public int resultGame = 3;
 	public Game(GameView gameView)
 	{
 		this.gameView = gameView;
+		this.sounds = new SoundPool(10, AudioManager.STREAM_MUSIC,0);
+//		this.borderSound = sounds.load(MainActivity.getAppContext(), R.raw.bouncefromborder, 1);
+		this.deathSound = sounds.load(MainActivity.getAppContext(), R.raw.death, 1);
+		this.blockSound = sounds.load(MainActivity.getAppContext(), R.raw.destroy, 1);
+		this.resultGame = 3;
 	}
 	
 	public void createObjects()
@@ -44,24 +60,28 @@ public class Game {
 	public void drawOnCanvas(Canvas canvas)
 	{
 		canvas.drawColor(Color.BLACK);
+//		pauseSprite = createPauseSprite();		
 		
+		
+		if (!prepareForGame) prepareForGame();
 		checkAlive();
-		
 		if (start)
-		{
+		{	
 			arrayOfLines = new ArrayList<Line>();
 			
 			addLinesFromNearestObjects();
 			addBorders();
 			addNewPlatformLines();
 			
-			spritesForDelete = ball.findLinesWithAccuracy(arrayOfLines, accuracyOfCalculatingIntersect);
+			spritesForDelete = ball.findSpritesWichIntersectsBall(arrayOfLines, accuracyOfCalculatingIntersect);
 			deleteSprite();
 		}
-		updateScore();
 		
-        ball.onDraw(canvas);
+		updateScore(canvas);
+        
+		ball.onDraw(canvas);
         platform.onDraw(canvas);
+        
         if(!blocks.isEmpty())
         {
         	for(Block block : blocks)
@@ -69,7 +89,15 @@ public class Game {
         		block.onDraw(canvas);
         	}	
         }    
-	}
+        if(!lives.isEmpty()){
+        	for(Sprite sprite : lives){
+        		sprite.onDraw(canvas);
+        	}
+        }
+        
+        showTitle(canvas);
+//        if (!start) pauseSprite.onDraw(canvas);
+        }
 	
 	private void deleteSprite()
 	{
@@ -78,45 +106,89 @@ public class Game {
 			for(Sprite sprite : spritesForDelete)
 			{
 				blocks.remove(sprite);
-				score += 150;
+				score += 15;
+				sounds.play(blockSound, 1, 1, 0, 0, 1.f);
 			}
+		} else if (ball.soundForBorder){
+//			sounds.play(borderSound, 1, 1, 0, 0, 1.f);
+			ball.soundForBorder = false;
 		}
 	}
 	
-	private void updateScore()
+	private void updateScore(Canvas canvas)
 	{
 		if (scoreForScreen < score){
 			scoreForScreen ++;
+		} else if (scoreForScreen > score ) scoreForScreen = 0;
+		canvas.drawText(String.valueOf(scoreForScreen), 30, 50, getPaintForScore());
+	}
+	private Paint getPaintForScore()
+	{
+		if(paint != null)
+		{
+			return paint;
+		} else {
+			paint = new Paint();
+			paint.setColor(Color.BLUE);
+			paint.setStyle(Paint.Style.FILL);
+			paint.setAntiAlias(true);
+			paint.setTextSize(50);
+			return paint;
 		}
-		// place For score update
+	}
+	private void showTitle(Canvas canvas)
+	{
+		if(resultGame == 1){
+			canvas.drawText("You win!", 50, 
+						gameView.getHeight()/2, getPaintForTitle());
+		} else if(resultGame == 2){
+			canvas.drawText("You lose!", 50, 
+					gameView.getHeight()/2, getPaintForTitle());
+		}
+	}
+	private Paint getPaintForTitle()
+	{
+		Paint paint = new Paint();
+		paint.setColor(Color.BLUE);
+		paint.setStyle(Paint.Style.FILL);
+		paint.setAntiAlias(true);
+		paint.setTextSize(150);
+		return paint;
 	}
 	
 	private void checkAlive()
 	{
-		if (!prepareForGame) prepareForGame();
 		if(ball.origin.y > gameView.getHeight()){
-			lives --;
+			livesCount --;
+			lives.remove(0);
+			sounds.play(deathSound, 1, 1, 0, 0, 1.f);
+			
 			prepareForGame = false;
 		}
-		if (lives < 1)
+		if (livesCount < 1)
 		{
-			//You lose!
-			ball.stop();
+			resultGame = 2;
+			showTitle = true;
 		}
 		if (blocks.isEmpty())
 		{
-			//You win!
+			resultGame = 1;
 			ball.stop();
+			showTitle = true;
 		}
 	}
     
 	private void prepareForGame()
 	{
-		if(lives < 1)
+		if(resultGame > 2)
 		{
 			platform.startPosition();	
 			createBlocks();
-			lives = 3;
+			livesCount = 3;
+			createLives();
+			score = 0;
+			resultGame = 0;
+			showTitle = false;
 		}
 		ball.stop();
 		platform.stop();
@@ -148,9 +220,15 @@ public class Game {
    	 
    	 return new Ball(gameView,bmp, 0, 0, 0, 0);
    }
+//	private Sprite createPauseSprite()
+//	{
+//		bmp = BitmapFactory.decodeResource(gameView.getResources(), R.drawable.pause);
+//    	return new Platform(gameView, bmp, 0,0, 0, 0);	
+//	}
 	
 	private void createBlocks()
 	{
+		blocks = new ArrayList<Block>();
 		bmp = BitmapFactory.decodeResource(gameView.getResources(), R.drawable.block);	
 		
 		ArrayList<Point> points = calculatePointsForBlocks(bmp);
@@ -158,6 +236,23 @@ public class Game {
 		for(Point point : points)
 		{
 			blocks.add(new Block(gameView, bmp, point.x, point.y, 0,0));
+		}
+	}
+	
+	private void createLives()
+	{
+		bmp = BitmapFactory.decodeResource(gameView.getResources(), R.drawable.heart);
+		
+		ArrayList<Point> points = new ArrayList<Point>();
+		
+		points.add(new Point(gameView.getWidth() - bmp.getWidth()/2 - bmp.getWidth()*3, bmp.getHeight() / 2));
+		points.add(new Point(gameView.getWidth() - bmp.getWidth()/2 - bmp.getWidth()*2, bmp.getHeight() / 2));
+		points.add(new Point(gameView.getWidth() - bmp.getWidth()/2 - bmp.getWidth(), bmp.getHeight() / 2));
+		
+		lives = new ArrayList<Sprite>();
+		for(Point point : points)
+		{
+			lives.add(new Block(gameView, bmp, point.x, point.y, 0,0));
 		}
 	}
 	

@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 
 public class Ball extends Sprite {
 
+	public boolean soundForBorder;
 	private boolean bounce = false;
 	public float accelerate = 0.2f;
 	public float maxSpeed = 12.f;
@@ -15,12 +16,14 @@ public class Ball extends Sprite {
 	private float savedXSpeed;
 	private float savedYSpeed;
 	private boolean refresh = false;
+	
 	private ArrayList<Sprite> spritesForDelete;
 	
 	public  Ball(GameView gameView, Bitmap bmp, int x, int y, int xSpeed, int ySpeed)
 	{
 		super(gameView, bmp, x, y, xSpeed, ySpeed);
 		this.stop();
+		
 	}
 	
 	 public void update() 
@@ -56,7 +59,7 @@ public class Ball extends Sprite {
 	 public void startPosition()
 	{
 		 origin.x = gameView.getWidth()/2 - width/2;
-		 origin.y = gameView.getHeight() - 50 - height;
+		 origin.y = gameView.getHeight() - 50 - height * 3;
 		 refresh = true;
 	}
 	public Point getCenter()
@@ -64,7 +67,7 @@ public class Ball extends Sprite {
   	   return new Point(origin.x + width/2.f,origin.y + height/2.f);
 	}   
 	
-	 public ArrayList<Sprite> findLinesWithAccuracy(ArrayList<Line> lines, float accuracy)
+	 public ArrayList<Sprite> findSpritesWichIntersectsBall(ArrayList<Line> lines, float accuracy)
 	 {
 		 spritesForDelete = new ArrayList<Sprite>();
 		 ArrayList<Line> linesWithIntersect = new ArrayList<Line>();
@@ -106,6 +109,7 @@ public class Ball extends Sprite {
 			 
 		 }else {
 			 bounceBall(line.getAngle());
+			 soundForBorder = true;
 		 }
 	 }
 	 
@@ -155,6 +159,7 @@ public class Ball extends Sprite {
 		 double lineAngle = Line.getAngle(getCenter().x, getCenter().y, 0,0);
 		 lineAngle += 180.f;
 		 bounceBall(lineAngle);
+		 soundForBorder = true;
 	 }
 	 
 	 private Line pickLineFromTwoLines(ArrayList<Line> lines)
@@ -188,6 +193,7 @@ public class Ball extends Sprite {
 		 } else if (sprite1 == null && sprite2 == null){
 			 double angle = currentBallAngle() + 90.f;
 			 bounceBall(angle);
+			 soundForBorder = true;
 			 return null;
 		 }/* else if (sprite1.get().getClass() == Platform.class)
 		 {
@@ -217,6 +223,7 @@ public class Ball extends Sprite {
 				 														getCenter().y + dy),
 				 														line);
 			 bounceBall(lineAngle);
+			 soundForBorder = true;
 		 }
 		 return null;
 	 }
@@ -245,7 +252,6 @@ public class Ball extends Sprite {
 		 timeLastBounce = System.currentTimeMillis();
 		 bounce = true;
 	 }
-	 
 	 
 	 private boolean checkIntersectCircleForLine(float centerx, float centery, double radius, Line line)
 	 {
